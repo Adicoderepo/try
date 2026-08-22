@@ -4,105 +4,102 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supabase Save Data</title>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
-        body{
-            margin:0;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            min-height:100vh;
-            background:#f4f4f4;
-            font-family:Arial,sans-serif;
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f4f4f4;
+            font-family: Arial, sans-serif;
         }
-
-        .container{
-            width:300px;
-            background:#fff;
-            padding:20px;
-            border-radius:10px;
-            box-shadow:0 0 10px rgba(0,0,0,.2);
+        .container {
+            width: 300px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,.2);
         }
-
-        h2{text-align:center;}
-
-        input{
-            width:100%;
-            padding:10px;
-            margin:10px 0;
-            box-sizing:border-box;
+        h2 { text-align: center; }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
         }
-
-        button{
-            width:100%;
-            padding:10px;
-            background:red;
-            color:white;
-            border:none;
-            cursor:pointer;
-            border-radius:5px;
+        button {
+            width: 100%;
+            padding: 10px;
+            background: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
         }
     </style>
 </head>
-
 <body>
 
-<div class="container">
-    <h2>Student Form</h2>
+    <div class="container">
+        <h2>Student Form</h2>
+        <input id="name" type="text" placeholder="Enter Name">
+        <input id="mobile" type="text" placeholder="Enter Mobile Number">
+        <button id="saveBtn" class="saveData">Save</button>
+    </div>
 
-   <input type="text" id="name" placeholder="Enter Name">
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const SUPABASE_URL = "https://gzitfihztwmvxsotihyl.supabase.co";
+            const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6aXRmaWh6dHdtdnhzb3RpaHlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczOTExNzUsImV4cCI6MjEwMjk2NzE3NX0.2jZCMxCC3B-rAE-FeRujPIC5FRf_g2aaHWCVFyNQwBc";
+            
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    <input type="text" id="mobile" placeholder="Enter Mobile Number">
+            document.getElementById("saveBtn").addEventListener("click", saveData);
 
-    <button onclick="saveData()" class="button-click">
-    Save
-    </button>
-</div>
+            async function saveData() {
+                const name = document.getElementById("name").value.trim();
+                const mobile = document.getElementById("mobile").value.trim();
 
-<script>
-const SUPABASE_URL = "https://gzitfihztwmvxsotihyl.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6aXRmaWh6dHdtdnhzb3RpaHlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczOTExNzUsImV4cCI6MjEwMjk2NzE3NX0.2jZCMxCC3B-rAE-FeRujPIC5FRf_g2aaHWCVFyNQwBc";
+                if (name === "" || mobile === "") {
+                    alert("⚠️ Name aur Mobile Number bharo.");
+                    return;
+                }
 
-const supabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
+                if (!/^[0-9]{10}$/.test(mobile)) {
+                    alert("⚠️ Mobile Number 10 digit ka hona chahiye.");
+                    return;
+                }
 
-document.getElementById("saveBtn").addEventListener("click", saveData);
+                // Show visual feedback during save
+                const btn = document.getElementById("saveBtn");
+                btn.disabled = true;
+                btn.innerText = "Saving...";
 
-async function saveData(){
+                try {
+                    const { error } = await supabase
+                        .from("try")
+                        .insert([{ name, mobile }]);
 
-    const name = document.getElementById("name").value.trim();
-    const mobile = document.getElementById("mobile").value.trim();
-
-    if(name==="" || mobile===""){
-        alert("⚠️ Name aur Mobile Number bharo.");
-        return;
-    }
-
-    if(!/^[0-9]{10}$/.test(mobile)){
-        alert("⚠️ Mobile Number 10 digit ka hona chahiye.");
-        return;
-    }
-
-    const {error} = await supabase
-      .from("try")
-      .insert([{name,mobile}]);
-
-    if(error){
-        console.log(error);
-        alert("❌ Data Save Nahi Hua!");
-    }else{
-        alert("✅ Data Successfully Save Ho Gaya!");
-
-        document.getElementById("name").value="";
-        document.getElementById("mobile").value="";
-        document.getElementById("name").focus();
-    }
-}
-</script>
-
+                    if (error) {
+                        console.error("Supabase Error:", error);
+                        alert("❌ Data Save Nahi Hua! Error: " + error.message);
+                    } else {
+                        alert("✅ Data Successfully Save Ho Gaya!");
+                        document.getElementById("name").value = "";
+                        document.getElementById("mobile").value = "";
+                        document.getElementById("name").focus();
+                    }
+                } catch (err) {
+                    console.error("Network Error:", err);
+                    alert("❌ Connection Issue!");
+                } finally {
+                    btn.disabled = false;
+                    btn.innerText = "Save";
+                }
+            }
+        });
+    </script>
 </body>
 </html>
