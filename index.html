@@ -59,15 +59,15 @@
             document.getElementById("saveBtn").addEventListener("click", saveData);
 
             async function saveData() {
-                const name = document.getElementById("Name").value.trim();
-                const mobile = document.getElementById("Mobile Number").value.trim();
+                const name = document.getElementById("name").value.trim();
+                const mobile = document.getElementById("mobile").value.trim();
 
-                if (Name === "" || Mobile Number === "") {
+                if (name === "" || mobile === "") {
                     alert("⚠️ Name aur Mobile Number bharo.");
                     return;
                 }
 
-                if (!/^[0-9]{10}$/.test(Mobile Number)) {
+                if (!/^[0-9]{10}$/.test(mobile)) {
                     alert("⚠️ Mobile Number 10 digit ka hona chahiye.");
                     return;
                 }
@@ -80,16 +80,16 @@
                 try {
                     const { error } = await supabase
                         .from("try")
-                        .insert([{ Name, Mobile Number }]);
+                        .insert([{ name, mobile }]);
 
                     if (error) {
                         console.error("Supabase Error:", error);
                         alert("❌ Data Save Nahi Hua! Error: " + error.message);
                     } else {
                         alert("✅ Data Successfully Save Ho Gaya!");
-                        document.getElementById("Name").value = "";
-                        document.getElementById("Mobile Number").value = "";
-                        document.getElementById("Name").focus();
+                        document.getElementById("name").value = "";
+                        document.getElementById("mobile").value = "";
+                        document.getElementById("name").focus();
                     }
                 } catch (err) {
                     console.error("Network Error:", err);
