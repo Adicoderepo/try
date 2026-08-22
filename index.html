@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supabase Save Data</title>
 
-    <!-- Supabase Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         body{
             margin:0;
-            padding:0;
             display:flex;
             justify-content:center;
             align-items:center;
@@ -21,41 +19,30 @@
         }
 
         .container{
-            background:white;
-            padding:25px;
-            border-radius:12px;
-            box-shadow:0 0 10px rgba(0,0,0,.2);
             width:300px;
-            text-align:center;
+            background:#fff;
+            padding:20px;
+            border-radius:10px;
+            box-shadow:0 0 10px rgba(0,0,0,.2);
         }
 
-        h2{
-            margin-bottom:20px;
-        }
+        h2{text-align:center;}
 
-        .input-box{
+        input{
             width:100%;
             padding:10px;
-            margin-bottom:15px;
-            border:1px solid #999;
-            border-radius:6px;
-            font-size:16px;
+            margin:10px 0;
             box-sizing:border-box;
         }
 
-        .button-click{
+        button{
             width:100%;
             padding:10px;
             background:red;
             color:white;
             border:none;
-            border-radius:6px;
             cursor:pointer;
-            font-size:16px;
-        }
-
-        .button-click:hover{
-            background:darkred;
+            border-radius:5px;
         }
     </style>
 </head>
@@ -63,22 +50,17 @@
 <body>
 
 <div class="container">
-
     <h2>Student Form</h2>
 
-    <input type="text" id="name" class="input-box" placeholder="Enter Name">
+    <input id="name" type="text" placeholder="Enter Name">
 
-    <input type="text" id="mobile" class="input-box" placeholder="Enter Mobile Number">
+    <input id="mobile" type="text" placeholder="Enter Mobile Number">
 
-    <button id="saveBtn" class="button-click">Save</button>
-
+    <button id="saveBtn">Save</button>
 </div>
 
 <script>
-
 const SUPABASE_URL = "https://gzitfihztwmvxsotihyl.supabase.co";
-
-/* 👇 यहाँ अपनी Publishable (Anon) Key पेस्ट करो */
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6aXRmaWh6dHdtdnhzb3RpaHlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczOTExNzUsImV4cCI6MjEwMjk2NzE3NX0.2jZCMxCC3B-rAE-FeRujPIC5FRf_g2aaHWCVFyNQwBc";
 
 const supabase = window.supabase.createClient(
@@ -86,7 +68,6 @@ const supabase = window.supabase.createClient(
     SUPABASE_KEY
 );
 
-// Save Button
 document.getElementById("saveBtn").addEventListener("click", saveData);
 
 async function saveData(){
@@ -94,8 +75,7 @@ async function saveData(){
     const name = document.getElementById("name").value.trim();
     const mobile = document.getElementById("mobile").value.trim();
 
-    // Validation
-    if(name === "" || mobile === ""){
+    if(name==="" || mobile===""){
         alert("⚠️ Name aur Mobile Number bharo.");
         return;
     }
@@ -105,15 +85,9 @@ async function saveData(){
         return;
     }
 
-    // Data Save
-    const { error } = await supabase
-        .from("students")
-        .insert([
-            {
-                name: name,
-                mobile: mobile
-            }
-        ]);
+    const {error} = await supabase
+      .from("try")
+      .insert([{name,mobile}]);
 
     if(error){
         console.log(error);
@@ -121,13 +95,11 @@ async function saveData(){
     }else{
         alert("✅ Data Successfully Save Ho Gaya!");
 
-        document.getElementById("name").value = "";
-        document.getElementById("mobile").value = "";
+        document.getElementById("name").value="";
+        document.getElementById("mobile").value="";
         document.getElementById("name").focus();
     }
-
 }
-
 </script>
 
 </body>
