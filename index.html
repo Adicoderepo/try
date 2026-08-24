@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supabase Save Data</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://jsdelivr.net"></script>
     <style>
         body {
             margin: 0;
@@ -46,12 +46,16 @@
         <h2>Student Form</h2>
         <input id="name" type="text" placeholder="Enter Name">
         <input id="mobile" type="text" placeholder="Enter Mobile Number">
+        
+        <!-- Sirf yeh ek line extra jodi hai photo select karne ke liye -->
+        <input id="photo" type="file" accept="image/*">
+        
         <button id="saveBtn" class="saveData">Save</button>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const SUPABASE_URL = "https://gzitfihztwmvxsotihyl.supabase.co";
+            const SUPABASE_URL = "https://supabase.co";
             const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6aXRmaWh6dHdtdnhzb3RpaHlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczOTExNzUsImV4cCI6MjEwMjk2NzE3NX0.2jZCMxCC3B-rAE-FeRujPIC5FRf_g2aaHWCVFyNQwBc";
             
             const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -61,6 +65,10 @@
             async function saveData() {
                 const name = document.getElementById("name").value.trim();
                 const mobile = document.getElementById("mobile").value.trim();
+                
+                // Photo input se file ko read karne ke liye
+                const photoInput = document.getElementById("photo");
+                const file = photoInput.files[0];
 
                 if (name === "" || mobile === "") {
                     alert("⚠️ Name aur Mobile Number bharo.");
@@ -72,15 +80,44 @@
                     return;
                 }
 
+                if (!file) {
+                    alert("⚠️ Kripya ek Photo select karein.");
+                    return;
+                }
+
                 // Show visual feedback during save
                 const btn = document.getElementById("saveBtn");
                 btn.disabled = true;
                 btn.innerText = "Saving...";
 
                 try {
+                    // 1. Photo ka unique naam generate karna
+                    const fileExtension = file.name.split('.').pop();
+                    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExtension}`;
+
+                    // 2. Supabase Storage Bucket ("photos") me image upload karna
+                    const { data: storageData, error: storageError } = await supabase
+                        .storage
+                        .from("photos")
+                        .upload(fileName, file);
+
+                    if (storageError) {
+                        alert("❌ Photo Upload Fail: " + storageError.message);
+                        return; // Agar photo upload nahi hui toh aage ka code nahi chalega
+                    }
+
+                    // 3. Uploaded photo ka Public Internet Link (URL) nikalna
+                    const { data: urlData } = supabase
+                        .storage
+                        .from("photos")
+                        .getPublicUrl(fileName);
+
+                    const photoUrl = urlData.publicUrl;
+
+                    // 4. Database table 'try' me data save karna (photo_url column ke sath)
                     const { error } = await supabase
                         .from("try")
-                        .insert([{ name, mobile }]);
+                        .insert([{ name, mobile, photo_url: photoUrl }]);
 
                     if (error) {
                         console.error("Supabase Error:", error);
@@ -89,6 +126,7 @@
                         alert("✅ Data Successfully Save Ho Gaya!");
                         document.getElementById("name").value = "";
                         document.getElementById("mobile").value = "";
+                        photoInput.value = ""; // Photo input clear karna
                         document.getElementById("name").focus();
                     }
                 } catch (err) {
